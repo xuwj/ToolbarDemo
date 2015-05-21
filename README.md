@@ -1,0 +1,2 @@
+# ToolbarDemo
+Toolbar结合Drawer，PagerSlidingTabStrip结合5.0Palette实现抽屉和变色效果的例子
