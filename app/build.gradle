@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.1"
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "com.xwj.toolbardemo"
@@ -10,17 +10,100 @@ android {
         targetSdkVersion 21
         versionCode 1
         versionName "1.0"
+
+        // 默认渠道 yingyongbao
+        manifestPlaceholders = [UMENG_CHANNEL_VALUE: "yingyongbao"]
     }
-    buildTypes {
+
+    signingConfigs {
+        //  debug config
+        debug {  // default
+
+        }
+
         release {
+            storeFile file("../yourapp.keystore")
+            storePassword "your password"
+            keyAlias "your alias"
+            keyPassword "your password"
+        }
+    }
+
+    buildTypes {
+//  ref http://www.open-open.com/lib/view/open1428320744713.html
+        debug {
+            // 是否显示Log
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            versionNameSuffix ".debug"
+            // 应用唯一id  方便你在同一个手机中安装debug版和release版本
+            applicationIdSuffix ".debug"
+            zipAlignEnabled false
+            // 是否移除无用的resource文件
+            shrinkResources false
+            signingConfig signingConfigs.debug
+            // 是否混淆
             minifyEnabled false
+        }
+
+        release {
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            versionNameSuffix ".release"
+            applicationIdSuffix ".release"
+            zipAlignEnabled true
+            // 慎用 配合minifyEnabled true 在getResources().getIdentifier(key, “drawable”,getPackageName()));中找不到资源
+            shrinkResources true
+            signingConfig signingConfigs.release
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    /**
+     * 方式一
+     */
+//    productFlavors {
+//        yingyongbao {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "yingyongbao"]
+//        }
+//        wandoujia {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "wandoujia"]
+//        }
+//        xiaomi {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "xiaomi"]
+//        }
+//        _360 {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "_360"]
+//        }
+//        huawei {
+//            manifestPlaceholders = [UMENG_CHANNEL_VALUE: "huawei"]
+//        }
+//    }
+
+    /**
+     * 方式二 批量修改
+     */
+    productFlavors {
+
+        yingyongbao {}
+        //  wandoujia {}
+        //  xiaomi {}
+        //  _360 {}
+        huawei {}
+
+    }
+
+    productFlavors {
+        productFlavors.all {
+            flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+        }
+    }
+
+
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.android.support:palette-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:palette-v7:22.2.0'
+    compile 'com.orhanobut:logger:1.11'
 }
