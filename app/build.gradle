@@ -1,5 +1,12 @@
 apply plugin: 'com.android.application'
 
+/**
+ * 打包时间
+ */
+def packageTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
@@ -31,7 +38,7 @@ android {
     }
 
     buildTypes {
-//  ref http://www.open-open.com/lib/view/open1428320744713.html
+        //ref http://www.open-open.com/lib/view/open1428320744713.html
         debug {
             // 是否显示Log
             buildConfigField "boolean", "LOG_DEBUG", "true"
@@ -53,7 +60,7 @@ android {
             zipAlignEnabled true
             // 慎用 配合minifyEnabled true 在getResources().getIdentifier(key, “drawable”,getPackageName()));中找不到资源
             shrinkResources true
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -98,6 +105,27 @@ android {
             flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
         }
     }
+
+    /**
+     *  修改最终生成的apk安装包的命名
+     */
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                File outputDirectory = new File(outputFile.parent);
+                def fileName
+                if (variant.buildType.name == "release") {
+                    // 输出apk名称为app_v1.0.0_2016-04-24_yingyongbao.apk
+                    fileName = "app_v${defaultConfig.versionName}_${packageTime()}_${variant.productFlavors[0].name}.apk"
+                } else {
+                    fileName = "app_v${defaultConfig.versionName}_${packageTime()}_${variant.productFlavors[0].name}_debug.apk"
+                }
+                output.outputFile = new File(outputDirectory, fileName)
+            }
+        }
+    }
+
 }
 
 /**
